@@ -1,0 +1,26 @@
+﻿@model IoTDashboardApp.Models.LoginViewModel
+
+@{
+    Layout = null;
+}
+
+
+<h2>Hoşgeldiniz,Giriş Yapınız.</h2>
+<form method="post">
+    <div>
+        <label>Kullanıcı Adı:</label>
+        <input type="text" name="Username" />
+    </div>
+    <br/>
+    <div>
+        <label>Şifre:</label>
+        <input type="password" name="Password" />
+    </div>
+    <br />
+    <button type="submit">Giriş Yap</button>
+
+    @if(ViewBag.Error!=null)
+    {
+        <p style="color:indianred">@ViewBag.Error</p>
+    }
+</form>

@@ -1,0 +1,28 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<p>Anlık Sıcaklık: <span id="liveValue">@ViewBag.temperature °C</span></p>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/dashboardHub")
+            .build();
+
+        connection.start().then(() => {
+            console.log("SignalR bağlantısı kuruldu.");
+        }).catch(err => console.error("Bağlantı hatası:", err));
+
+        connection.on("ReceiveValue", function (value) {
+            document.getElementById("liveValue").innerText = value;
+        });
+
+        // // 5 saniyede bir veriyi çekmek için tetikleyici
+        // setInterval(() => {
+        //     fetch("/Dashboard/SendValue");
+        // }, 5000);
+    </script>
+}
