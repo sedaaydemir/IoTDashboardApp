@@ -50,7 +50,7 @@ namespace IoTDashboardApp.Controllers
         }
 
 
-        ////test amaclı sabıt verıler gırıldı
+        ////test amaclı sabıt verıler gırıldı sonradan iptal edıldı
         //public async Task<IActionResult> SendValue()
         //{
         //    float temperature = await _modbusService.ReadTemperatureAsync();
