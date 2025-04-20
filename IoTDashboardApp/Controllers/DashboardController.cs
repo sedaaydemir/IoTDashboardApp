@@ -5,32 +5,34 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.Threading.Tasks;
 
+//sadece sayfayı acsın, sıcaklık verısını tasımasın
 
 namespace IoTDashboardApp.Controllers
 {
     public class DashboardController : Controller
     {
-        private readonly IHubContext<DashboardHub> _hubContext;
-        private readonly ModbusService _modbusService;
+        //private readonly IHubContext<DashboardHub> _hubContext;
+        //private readonly ModbusService _modbusService;
 
-        public DashboardController(IHubContext<DashboardHub> hubContext, ModbusService modbusService)
-        {
-            _hubContext = hubContext;
-            _modbusService = modbusService;
-        }
-        [HttpGet]
-        public async Task<IActionResult> TestConnection()
-        {
-            bool isConnected = await _modbusService.TestConnection();
-            if (isConnected)
-            {
-                return Ok("Bağlantı başarılı.");
-            }
-            else
-            {
-                return StatusCode(500, "Bağlantı hatası.");
-            }
-        }
+        //public DashboardController(IHubContext<DashboardHub> hubContext, ModbusService modbusService)
+        //{
+        //    _hubContext = hubContext;
+        //    _modbusService = modbusService;
+        //}
+        ////sayfa acıldıgında baglantı yapılsın
+        //[HttpGet]
+        //public async Task<IActionResult> TestConnection()
+        //{
+        //    bool isConnected = await _modbusService.ConnectAsync();
+        //    if (isConnected)
+        //    {
+        //        return Ok("Bağlantı başarılı.");
+        //    }
+        //    else
+        //    {
+        //        return StatusCode(500, "Bağlantı hatası.");
+        //    }
+        //}
 
 
         public async Task<IActionResult> Index()
@@ -40,9 +42,9 @@ namespace IoTDashboardApp.Controllers
                 return RedirectToAction("Index","Login");
             }
 
-            // Sıcaklık verisini al
-            float temperature = await _modbusService.ReadTemperatureAsync();
-            ViewBag.Temperature = temperature;
+            //// Sıcaklık verisini al
+            //float temperature = await _modbusService.ReadTemperatureAsync();
+            //ViewBag.Temperature = temperature;
 
             return View();
         }

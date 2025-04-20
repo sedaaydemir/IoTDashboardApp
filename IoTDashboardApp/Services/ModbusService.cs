@@ -1,4 +1,5 @@
 ﻿using EasyModbus;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
 
@@ -6,80 +7,75 @@ namespace IoTDashboardApp.Services
 {
     public class ModbusService
     {
-        //modbus baglantısı yapılacak
-        //verı alıp verı dondurecek
+        //modbus baglantı tanımı
         private ModbusClient _modbusClient;
 
         public ModbusService()
         {
-            _modbusClient = new ModbusClient("127.0.0.1", 502); // IP ve Port bilgilerini burada güncelleyin
+            _modbusClient = new ModbusClient("127.0.0.1", 502); // IP ve Port 192.168.3.250
         }
 
 
-        // Modbus cihazına bağlan
+        // Modbus baglantısı baslat
         public async Task<bool> ConnectAsync()
         {
             try
             {
-                // Bağlantı zaman aşımını 5 saniye olarak ayarlıyoruz
                 _modbusClient.ConnectionTimeout = 5000;
-
-                // Bağlantıyı doğrudan başlatıyoruz
                 _modbusClient.Connect();
 
-                // Bağlantı başarılı ise true döndürüyoruz
                 return _modbusClient.Connected;
             }
             catch (EasyModbus.Exceptions.ConnectionException ex)
             {
-                // Bağlantı hatası durumunda özel mesajla hata yönetimi
+                //consolda baglantıyı kontrol edelım
                 Console.WriteLine($"Bağlantı hatası: {ex.Message}");
                 return false;
             }
             catch (Exception ex)
             {
-                // Diğer hatalar için genel hata yönetimi
+                // dıgerdurumları gorelım
                 Console.WriteLine($"Beklenmedik hata: {ex.Message}");
                 return false;
             }
         }
 
-        public async Task<bool> TestConnection()
-        {
-            bool isConnected = await ConnectAsync();
-            if (isConnected)
-            {
-                Console.WriteLine("Bağlantı başarılı.");
-                return true;
-            }
-            else
-            {
-                Console.WriteLine("Bağlantı hatası.");
-                return false;
-            }
-        }
-        // Modbus cihazından sıcaklık verisini oku
+        //public async Task<bool> TestConnection()
+        //{
+        //    bool isConnected = await ConnectAsync();
+        //    if (isConnected)
+        //    {
+        //        Console.WriteLine("Bağlantı başarılı.");
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        Console.WriteLine("Bağlantı hatası.");
+        //        return false;
+        //    }
+        //}
+        // Read modbus
         public async Task<float> ReadTemperatureAsync()
         {
             try
             {
-                // Holding register'dan sıcaklık değeri oku (örneğin register 1'den)
-                int[] values = await Task.Run(() => _modbusClient.ReadHoldingRegisters(66, 2));
+                int[] values = await Task.Run(() => _modbusClient.ReadHoldingRegisters(1, 2));
 
-                // 2 register'ı kullanarak sıcaklık değerini hesapla
-                if (values.Length >=2 )
+                if (values.Length >= 2)
                 {
-                    // Örneğin sıcaklık değeri iki register'da birleştirilmiş olabilir
+                    // float D66 adresinden veri okuma
+
                     short temperature = (short)values[0]; // signed dönüşüm
                     float result = temperature / 10f;
+                    Console.WriteLine($"Okunan sıcaklık: {result} °C"); // Debug için log
                     return result;
                 }
-
                 else
                 {
                     Console.WriteLine("Veri okunamadı.");
-                    return 0f;
+                    return 0f; // Eğer okuma yapılmazsa, 0 döndür
                 }
+
             }
             catch (Exception ex)
             {
@@ -88,20 +84,20 @@ namespace IoTDashboardApp.Services
             }
         }
 
-        // Modbus cihazından veri yaz
-        public async Task WriteDataAsync(int register, int value)
-        {
-            try
-            {
-                await Task.Run(() => _modbusClient.WriteSingleRegister(register, value));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Yazma hatası: {ex.Message}");
-            }
-        }
+        //// Write modbus
+        //public async Task WriteDataAsync(int register, int value)
+        //{
+        //    try
+        //    {
+        //        await Task.Run(() => _modbusClient.WriteSingleRegister(register, value));
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Yazma hatası: {ex.Message}");
+        //    }
+        //}
 
-        // Bağlantıyı kes
+        // Bağlantıyı kesme durumu
         public void Disconnect()
         {
             _modbusClient.Disconnect();

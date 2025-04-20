@@ -3,26 +3,31 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<p>Anlık Sıcaklık: <span id="liveValue">@ViewBag.temperature °C</span></p>
+<h2>Anlık Sıcaklık: <span id="temp">0</span> °C</h2>
 
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script>
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/dashboardHub")
+        // PlcHub bağlantısı
+        const plcConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/plcHub")
             .build();
 
-        connection.start().then(() => {
-            console.log("SignalR bağlantısı kuruldu.");
-        }).catch(err => console.error("Bağlantı hatası:", err));
-
-        connection.on("ReceiveValue", function (value) {
-            document.getElementById("liveValue").innerText = value;
+        // PLC'den sıcaklık verisini al
+        plcConnection.on("ReceiveTemperature", function (temperature) {
+            console.log("Gelen sıcaklık:", temperature);
+            document.getElementById("temp").innerText = temperature;
         });
 
-        // // 5 saniyede bir veriyi çekmek için tetikleyici
-        // setInterval(() => {
-        //     fetch("/Dashboard/SendValue");
-        // }, 5000);
+        // Bağlantıyı başlat
+        async function startPlcConnection() {
+            try {
+                await plcConnection.start();
+                console.log("PlcHub bağlantısı kuruldu.");
+            } catch (err) {
+                console.error("PlcHub bağlantı hatası:", err);
+            }
+        }
+
+        startPlcConnection();
     </script>
 }
