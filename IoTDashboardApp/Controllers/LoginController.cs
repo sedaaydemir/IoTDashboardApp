@@ -5,7 +5,7 @@ namespace IoTDashboardApp.Controllers
 {
     public class LoginController : Controller
     {
-
+        //projenın bu asamasında sabıt olacak, daha sonra dınamık hale cevırebılırım
         private const string USERNAME = "admin";
         private const string PASSWORD = "1234";
         public IActionResult Index()

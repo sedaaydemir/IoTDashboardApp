@@ -3,7 +3,29 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+@* en ustte anlık sıcaklık degerını gor *@
 <h2>Anlık Sıcaklık: <span id="temp">0</span> °C</h2>
+<br/>
+
+
+
+@* buton ıle plc den veri oku mesela basınc degerını *@
+<div class="container">
+    <br/><br/>
+    <label id="resultLabel">Henüz veri yok</label>
+ <br />
+    <button type="button" class="btn btn-success" id="readButton">Veriyi Oku</button>
+</div>
+
+
+@* buton ıle plc ye verı yaz mesela ofset skala degerını yaz *@ 
+<div class="container">
+    <br/><br />
+    <input type="text" id="plcInput" placeholder="PLC'ye yazılacak veri" class="form-control" />
+    <br />
+    <button type="button" class="btn btn-primary" id="writeButton">Veriyi Gönder</button>
+</div> 
+
 
 @section Scripts {
     <script>
@@ -12,13 +34,7 @@
             .withUrl("/plcHub")
             .build();
 
-        // PLC'den sıcaklık verisini al
-        plcConnection.on("ReceiveTemperature", function (temperature) {
-            console.log("Gelen sıcaklık:", temperature);
-            document.getElementById("temp").innerText = temperature;
-        });
-
-        // Bağlantıyı başlat
+            // Bağlantıyı başlat
         async function startPlcConnection() {
             try {
                 await plcConnection.start();
@@ -27,7 +43,63 @@
                 console.error("PlcHub bağlantı hatası:", err);
             }
         }
-
         startPlcConnection();
+
+
+
+
+
+        // PLC'den sıcaklık verisini al
+        plcConnection.on("ReceiveTemperature", function (temperature) {
+            console.log("Gelen sıcaklık:", temperature);
+            document.getElementById("temp").innerText = temperature;
+        });
+
+
+
+
+
+
+        //plc den verı okuma buton ıle
+        document.getElementById("readButton").addEventListener("click", function () {
+            fetch("/api/plc/read") // ← burada API yolunu kendi projenle eşleştir
+                .then(response => response.text()) // ya da .json() ise objeyi çözersin
+                .then(data => {
+                    document.getElementById("resultLabel").innerText = data;
+                })
+                .catch(error => {
+                    document.getElementById("resultLabel").innerText = "Hata oluştu";
+                });
+        });
+
+
+
+
+
+        //plc ye verı yazmadocument.getElementById("writeButton").addEventListener("click", function () {
+        document.getElementById("writeButton").addEventListener("click", function () {
+            var value = parseFloat(document.getElementById("plcInput").value);
+
+            fetch("/api/plc/write-float", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ value: value })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                })
+                .catch(error => {
+                    console.error("Hata:", error);
+                });
+        });
+
     </script>
 }
+
+        
+
+       
+   

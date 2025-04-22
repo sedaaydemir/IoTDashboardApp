@@ -40,21 +40,9 @@ namespace IoTDashboardApp.Services
             }
         }
 
-        //public async Task<bool> TestConnection()
-        //{
-        //    bool isConnected = await ConnectAsync();
-        //    if (isConnected)
-        //    {
-        //        Console.WriteLine("Bağlantı başarılı.");
-        //        return true;
-        //    }
-        //    else
-        //    {
-        //        Console.WriteLine("Bağlantı hatası.");
-        //        return false;
-        //    }
-        //}
-        // Read modbus
+
+
+        // sureklı sıcaklık okuma
         public async Task<float> ReadTemperatureAsync()
         {
             try
@@ -63,7 +51,7 @@ namespace IoTDashboardApp.Services
 
                 if (values.Length >= 2)
                 {
-                    // float D66 adresinden veri okuma
+                    // float D1 adresinden veri okuma
 
                     short temperature = (short)values[0]; // signed dönüşüm
                     float result = temperature / 10f;
@@ -84,18 +72,66 @@ namespace IoTDashboardApp.Services
             }
         }
 
-        //// Write modbus
-        //public async Task WriteDataAsync(int register, int value)
-        //{
-        //    try
-        //    {
-        //        await Task.Run(() => _modbusClient.WriteSingleRegister(register, value));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"Yazma hatası: {ex.Message}");
-        //    }
-        //}
+        //clıck ıle basınc okuma
+        public async Task<float> ReadFromBasinc()
+        {
+            try
+            {
+                int[] values = await Task.Run(() => _modbusClient.ReadHoldingRegisters(3, 2));
+
+                if (values.Length >= 2)
+                {
+                    // float D1 adresinden veri okuma
+
+                    short pressure = (short)values[0]; // signed dönüşüm
+                    float result = pressure / 10f;
+                    Console.WriteLine($"Okunan basınc: {result} °C"); // Debug için log
+                    return result;
+                }
+                else
+                {
+                    Console.WriteLine("Veri okunamadı.");
+                    return 0f; // Eğer okuma yapılmazsa, 0 döndür
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Okuma hatası: {ex.Message}");
+                return 0f;
+            }
+
+        }
+        public int[] FloatToRegisters(float value)
+        {
+            // Float değeri byte dizisine dönüştür
+            byte[] bytes = BitConverter.GetBytes(value);
+
+            // Eğer Endian ters ise (BigEndian vs LittleEndian) buraya Array.Reverse() ekleyebilirsin
+            Array.Reverse(bytes); // Eğer Endian problemi varsa
+
+            // 2 adet int16 register'a bölüyoruz
+            return new int[]
+            {
+        BitConverter.ToInt16(bytes, 0),
+        BitConverter.ToInt16(bytes, 2)
+            };
+        }
+        //plc ye verı yazma
+        public async Task<bool> WriteFloatToPlcAsync(string address, float value)
+        {
+            try
+            {
+                // Float değeri yaz
+                return await WriteFloatToPlcAsync(address, value);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Hata: {ex.Message}");
+                return false;
+            }
+        }
+
 
         // Bağlantıyı kesme durumu
         public void Disconnect()
