@@ -2,6 +2,6 @@
 {
     public class PlcDto
     {
-        public float scala { get; set; }
+        public int value { get; set; }
     }
 }

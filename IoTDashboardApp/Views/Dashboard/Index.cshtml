@@ -14,7 +14,7 @@
     <br/><br/>
     <label id="resultLabel">Henüz veri yok</label>
  <br />
-    <button type="button" class="btn btn-success" id="readButton">Veriyi Oku</button>
+    <button type="button" class="btn btn-success" id="readButton">Basınç Oku</button>
 </div>
 
 
@@ -25,6 +25,15 @@
     <br />
     <button type="button" class="btn btn-primary" id="writeButton">Veriyi Gönder</button>
 </div> 
+
+
+@* buton ıle plc den veri oku mesela sevıye degerını *@
+<div class="container">
+    <br /><br />
+    <label id="resultLabelLevel">....</label>
+    <br />
+    <button type="button" class="btn btn-success" id="readButtonLevel">Seviye Oku</button>
+</div>
 
 
 @section Scripts {
@@ -62,7 +71,7 @@
 
         //plc den verı okuma buton ıle
         document.getElementById("readButton").addEventListener("click", function () {
-            fetch("/api/plc/read") // ← burada API yolunu kendi projenle eşleştir
+            fetch("/api/Dashboard/read") // ← burada API yolunu kendi projenle eşleştir
                 .then(response => response.text()) // ya da .json() ise objeyi çözersin
                 .then(data => {
                     document.getElementById("resultLabel").innerText = data;
@@ -74,13 +83,25 @@
 
 
 
+        //plc den verı okuma buton ıle
+        document.getElementById("readButtonLevel").addEventListener("click", function () {
+            fetch("/api/Dashboard/readLevel") // ← burada API yolunu kendi projenle eşleştir
+                .then(response => response.text()) // ya da .json() ise objeyi çözersin
+                .then(data => {
+                    document.getElementById("resultLabelLevel").innerText = data;
+                })
+                .catch(error => {
+                    document.getElementById("resultLabelLevel").innerText = "Hata oluştu";
+                });
+        });
 
 
-        //plc ye verı yazmadocument.getElementById("writeButton").addEventListener("click", function () {
+
+        // //plc ye verı yazmadocument.getElementById("writeButton").addEventListener("click", function () {
         document.getElementById("writeButton").addEventListener("click", function () {
             var value = parseFloat(document.getElementById("plcInput").value);
 
-            fetch("/api/plc/write-float", {
+            fetch("/api/Dashboard/write-float", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

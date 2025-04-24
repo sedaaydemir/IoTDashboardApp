@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace IoTDashboardApp.Services
 {
-    public class ModbusService
+    public class ModbusService : IModbusService
     {
         //modbus baglantı tanımı
         private ModbusClient _modbusClient;
@@ -21,8 +21,11 @@ namespace IoTDashboardApp.Services
         {
             try
             {
-                _modbusClient.ConnectionTimeout = 5000;
-                _modbusClient.Connect();
+                if (!_modbusClient.Connected) // ← EKLENDİ
+                {
+                    _modbusClient.ConnectionTimeout = 5000;
+                    _modbusClient.Connect();
+                }
 
                 return _modbusClient.Connected;
             }
@@ -41,10 +44,12 @@ namespace IoTDashboardApp.Services
         }
 
 
-
-        // sureklı sıcaklık okuma
+        //sıcaklık degerını okuma
         public async Task<float> ReadTemperatureAsync()
         {
+
+            //if (!_modbusClient.Connected)
+            //    await ConnectAsync(); 
             try
             {
                 int[] values = await Task.Run(() => _modbusClient.ReadHoldingRegisters(1, 2));
@@ -72,9 +77,12 @@ namespace IoTDashboardApp.Services
             }
         }
 
-        //clıck ıle basınc okuma
+        //Basınc degerını okuma
         public async Task<float> ReadFromBasinc()
         {
+            //if (!_modbusClient.Connected)
+            //    await ConnectAsync();
+
             try
             {
                 int[] values = await Task.Run(() => _modbusClient.ReadHoldingRegisters(3, 2));
@@ -102,42 +110,72 @@ namespace IoTDashboardApp.Services
             }
 
         }
-        public int[] FloatToRegisters(float value)
+
+
+
+        //seviyeleri okuma
+        public async Task<float> ReadLevelAsync()
         {
-            // Float değeri byte dizisine dönüştür
-            byte[] bytes = BitConverter.GetBytes(value);
+            //if (!_modbusClient.Connected)
+            //    await ConnectAsync();
 
-            // Eğer Endian ters ise (BigEndian vs LittleEndian) buraya Array.Reverse() ekleyebilirsin
-            Array.Reverse(bytes); // Eğer Endian problemi varsa
-
-            // 2 adet int16 register'a bölüyoruz
-            return new int[]
+            try
             {
-        BitConverter.ToInt16(bytes, 0),
-        BitConverter.ToInt16(bytes, 2)
-            };
+                int[] values = await Task.Run(() => _modbusClient.ReadHoldingRegisters(5, 2));
+
+                if (values.Length >= 2)
+                {
+                    // float D1 adresinden veri okuma
+
+                    short level = (short)values[0]; // signed dönüşüm
+                    float result = level / 10f;
+                    Console.WriteLine($"Okunan basınc: {result} lt"); // Debug için log
+                    return result;
+                }
+                else
+                {
+                    Console.WriteLine("Veri okunamadı.");
+                    return 0f; // Eğer okuma yapılmazsa, 0 döndür
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Okuma hatası: {ex.Message}");
+                return 0f;
+            }
         }
-        //plc ye verı yazma
-        public async Task<bool> WriteFloatToPlcAsync(string address, float value)
+
+
+
+        ////plc ye verı yazma
+        public Task<bool> WriteLevelAsync(float value)
         {
             try
             {
-                // Float değeri yaz
-                return await WriteFloatToPlcAsync(address, value);
+                int address = 7;
+                byte[] bytes = BitConverter.GetBytes(value);
+
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(bytes);
+
+                int high = (bytes[0] << 8) | bytes[1];
+                int low = (bytes[2] << 8) | bytes[3];
+
+                int[] data = new int[] { high, low };
+
+                _modbusClient.WriteMultipleRegisters(address, data); // ← await yok
+
+                return Task.FromResult(true);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Hata: {ex.Message}");
-                return false;
+                return Task.FromResult(false);
             }
         }
 
 
-        // Bağlantıyı kesme durumu
-        public void Disconnect()
-        {
-            _modbusClient.Disconnect();
-        }
     }
 }
 

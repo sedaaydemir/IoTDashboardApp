@@ -7,8 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();//sessýon eklendý kullanýlmak ýcýn
 builder.Services.AddSignalR();//signalR ayarý
-builder.Services.AddSingleton<ModbusService>();//modbus servýsý ekledýk bu servýsý uygulamanýn her yerýnde kullanabýlecegýz
-builder.Services.AddHostedService<PlcWorker>();
+builder.Services.AddHostedService<TempContReadService>();
+builder.Services.AddSingleton<IModbusService, ModbusService>();//IModbusSevirce nýn hangý sýnýfa karsýlýk geldýgýný býldýr
 
 var app = builder.Build();
 
@@ -32,6 +32,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Login}/{action=Index}/{id?}");//ilk basta logýn sayfasý acýlsýn
 
-app.MapHub<DashboardHub>("/dashboardHub"); // DashboardHub için route
+//app.MapHub<DashboardHub>("/dashboardHub"); // DashboardHub için route
 app.MapHub<PlcHub>("/plcHub"); // PlcHub için ayrý bir route
+
 app.Run();
