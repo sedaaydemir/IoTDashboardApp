@@ -23,7 +23,7 @@
     <br/><br />
     <input type="text" id="plcInput" placeholder="PLC'ye yazılacak veri" class="form-control" />
     <br />
-    <button type="button" class="btn btn-primary" id="writeButton">Veriyi Gönder</button>
+    <button type="button" class="btn btn-primary" id="writeButton">Write To PLC</button>
 </div> 
 
 
@@ -47,7 +47,7 @@
         async function startPlcConnection() {
             try {
                 await plcConnection.start();
-                console.log("PlcHub bağlantısı kuruldu.");
+                console.log("PlcHub bağlantısı kuruldu.");//gorebılmek adına
             } catch (err) {
                 console.error("PlcHub bağlantı hatası:", err);
             }
@@ -58,14 +58,11 @@
 
 
 
-        // PLC'den sıcaklık verisini al
+        // PLC'den sıcaklık verisini sureklı al
         plcConnection.on("ReceiveTemperature", function (temperature) {
             console.log("Gelen sıcaklık:", temperature);
             document.getElementById("temp").innerText = temperature;
         });
-
-
-
 
 
 
@@ -97,7 +94,7 @@
 
 
 
-        // //plc ye verı yazmadocument.getElementById("writeButton").addEventListener("click", function () {
+        // //plc ye verı yazma
         document.getElementById("writeButton").addEventListener("click", function () {
             var value = parseFloat(document.getElementById("plcInput").value);
 

@@ -8,10 +8,17 @@ namespace IoTDashboardApp.Controllers
         //projenın bu asamasında sabıt olacak, daha sonra dınamık hale cevırebılırım
         private const string USERNAME = "admin";
         private const string PASSWORD = "1234";
+
+        [HttpGet]
         public IActionResult Index()
         {
-            return View();
+			// Kullanıcı zaten giriş yaptıysa direkt Dashboard'a yönlendir
+			if (HttpContext.Session.GetString("IsLoggedIn") == "true")
+				return RedirectToAction("Index", "Dashboard");
+
+			return View();
         }
+
 
         //form gonderıldıgınde calısacak
         [HttpPost]

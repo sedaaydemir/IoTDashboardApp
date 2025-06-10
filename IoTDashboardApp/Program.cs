@@ -5,7 +5,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddSession();//sessýon eklendý kullanýlmak ýcýn
+builder.Services.AddSession();//kullanýcý gýrýsý ýcýn sessýon eklendý
+
 builder.Services.AddSignalR();//signalR ayarý
 builder.Services.AddHostedService<TempContReadService>();
 builder.Services.AddSingleton<IModbusService, ModbusService>();//IModbusSevirce nýn hangý sýnýfa karsýlýk geldýgýný býldýr
